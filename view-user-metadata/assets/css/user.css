@@ -1,0 +1,128 @@
+#SS88VUM-toggle[type=checkbox]{height:0;width:0;visibility:hidden;display:none;}
+#SS88VUM-toggle + label{display: inline-block;margin-left: 15px;cursor:pointer;text-indent:-9999px;width:60px;height:30px;background:grey;border-radius:100px;position:relative}
+#SS88VUM-toggle + label:after{content:"OFF";position:absolute;top:5px;left:5px;width:20px;height:20px;background:#fff;border-radius:90px;transition:.3s;font-size: 8px;text-align: center;text-indent: initial;line-height: 2.5;color: grey;}
+#SS88VUM-toggle:checked + label { background: #3bd237; }
+#SS88VUM-toggle:checked + label:after { content:"ON"; left: calc(100% - 25px); }
+#SS88-VUM-heading {display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#SS88VUM-export-wrap {position:relative;margin-left:auto;}
+#SS88VUM-export-menu {display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:120px;background:#fff;border:1px solid #c3c4c7;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:99;}
+#SS88VUM-export-menu.is-open {display:block;}
+#SS88VUM-export-menu button {display:block;width:100%;border:0;background:transparent;text-align:left;padding:8px 10px;cursor:pointer;}
+#SS88VUM-export-menu button:hover {background:#f6f7f7;}
+
+#SS88-VUM-table-wrapper {
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.26);
+    border-radius: 8px;
+    width:100%;
+    overflow-x: auto;
+    background:white;
+}
+#SS88-VUM-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin:0;
+}
+#SS88-VUM-table th {
+    border-bottom: 1px solid #ddd;
+	padding-right:40px!important;
+}
+
+#SS88-VUM-table th, #SS88-VUM-table td {
+    text-align: left;
+    padding: 12px;
+	position:relative;
+}
+#SS88-VUM-table td {
+    font-family:monospace;
+}
+
+#SS88-VUM-table tr {
+    border-bottom: 1px solid #ddd;
+}
+#SS88-VUM-table tr:last-child th, #SS88-VUM-table tr:last-child {
+    border-bottom:0;
+}
+
+#SS88-VUM-table th, #SS88-VUM-table tr:hover {
+    background-color: #f9fafb;
+}
+
+#SS88-VUM-table-wrapper.has-acfe {
+    border:0;
+    box-shadow:none;
+    border-radius: 0;
+    border-right:1px solid #c3c4c7;
+}
+#SS88-VUM-table-wrapper.has-acfe #SS88-VUM-table {
+    border-right:0;
+
+}
+#SS88-VUM-table-wrapper.has-acfe #SS88-VUM-table tr:last-child {
+    border-bottom: 1px solid #c3c4c7;
+}
+
+
+.btn-delete {
+	border:0;
+	padding:0;
+	background:transparent;
+	cursor:pointer;
+	opacity:0.5;
+	transition:all 0.3s ease-in-out;
+	position:absolute;
+    top: 10px;
+    right: 10px;
+}
+.btn-delete:hover {
+	opacity:1;
+}
+.btn-lock {
+	border:0;
+	padding:0;
+	margin:0 6px 0 0;
+	background:transparent;
+	cursor:pointer;
+	opacity:0.8;
+	vertical-align:middle;
+}
+.btn-lock:hover {
+	opacity:1;
+}
+.btn-lock.is-unlocked .dashicons {
+	color:#d63638;
+}
+.btn-delete.is-hidden {
+	display:none!important;
+}
+
+
+#SS88-VUM-table.ss88-focus tr {
+    opacity:0.2;
+    transition:opacity 0.3s ease-in-out;
+}
+#SS88-VUM-table.ss88-focus tr.ss88-focus {
+    opacity:1;
+    background-color:#f9fafb;
+}
+
+
+.flex-wrap {
+    display:inline-flex;
+    align-items:center;
+}
+
+
+@media screen and (max-width:768px) {
+
+	#SS88-VUM-table th {
+		padding-right:20px!important;
+	}
+
+	.btn-delete {
+		position: relative;
+		top: -2px;
+		right: -5px;
+	}
+
+
+}
