@@ -4,7 +4,9 @@
 #SS88VUM-toggle:checked + label { background: #3bd237; }
 #SS88VUM-toggle:checked + label:after { content:"ON"; left: calc(100% - 25px); }
 #SS88-VUM-heading {display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-#SS88VUM-export-wrap {position:relative;margin-left:auto;}
+#SS88VUM-raw-toggle {margin-left:auto;}
+#SS88VUM-raw-toggle[aria-pressed="true"] {background:#f0f0f1;border-color:#8c8f94;box-shadow:inset 0 2px 5px -3px rgba(0,0,0,.5);}
+#SS88VUM-export-wrap {position:relative;}
 #SS88VUM-export-menu {display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:120px;background:#fff;border:1px solid #c3c4c7;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:99;}
 #SS88VUM-export-menu.is-open {display:block;}
 #SS88VUM-export-menu button {display:block;width:100%;border:0;background:transparent;text-align:left;padding:8px 10px;cursor:pointer;}
@@ -35,6 +37,37 @@
 #SS88-VUM-table td {
     font-family:monospace;
 }
+#SS88-VUM-table .ss88-vum-value {
+    margin:0;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+#SS88-VUM-table .ss88-vum-value + .ss88-vum-value {
+    margin-top:8px;
+    padding-top:8px;
+    border-top:1px dashed #ddd;
+}
+#SS88-VUM-table .ss88-vum-value.is-empty {
+    font-style:italic;
+    color:#a7aaad;
+}
+#SS88-VUM-table .ss88-vum-raw,
+#SS88-VUM-table-wrapper.is-raw .ss88-vum-formatted {
+    display:none;
+}
+#SS88-VUM-table-wrapper.is-raw .ss88-vum-raw {
+    display:block;
+}
+#SS88-VUM-table td {
+    padding-right:40px;
+}
+#SS88-VUM-table .ss88-vum-multi {
+    display:inline-block;
+    margin-bottom:6px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:11px;
+    color:#646970;
+}
 
 #SS88-VUM-table tr {
     border-bottom: 1px solid #ddd;
@@ -62,7 +95,7 @@
 }
 
 
-.btn-delete {
+.ss88-vum-delete {
 	border:0;
 	padding:0;
 	background:transparent;
@@ -73,10 +106,10 @@
     top: 10px;
     right: 10px;
 }
-.btn-delete:hover {
+.ss88-vum-delete:hover {
 	opacity:1;
 }
-.btn-lock {
+.ss88-vum-lock {
 	border:0;
 	padding:0;
 	margin:0 6px 0 0;
@@ -85,13 +118,18 @@
 	opacity:0.8;
 	vertical-align:middle;
 }
-.btn-lock:hover {
+.ss88-vum-lock:hover {
 	opacity:1;
 }
-.btn-lock.is-unlocked .dashicons {
+.ss88-vum-lock.is-fixed {
+	display:inline-block;
+	opacity:0.35;
+	cursor:help;
+}
+.ss88-vum-lock.is-unlocked .dashicons {
 	color:#d63638;
 }
-.btn-delete.is-hidden {
+.ss88-vum-delete.is-hidden {
 	display:none!important;
 }
 
@@ -106,11 +144,56 @@
 }
 
 
-.flex-wrap {
+.ss88-vum-flex {
     display:inline-flex;
     align-items:center;
 }
 
+
+.ss88-vum-copy {
+	border:0;
+	padding:0;
+	margin:0 0 0 6px;
+	background:transparent;
+	cursor:pointer;
+	opacity:0;
+	transition:opacity 0.2s ease-in-out;
+}
+.ss88-vum-copy .dashicons {
+	font-size:16px;
+	width:16px;
+	height:16px;
+}
+.ss88-vum-copy-value {
+	position:absolute;
+	top:12px;
+	right:10px;
+	margin:0;
+}
+#SS88-VUM-table tr:hover .ss88-vum-copy,
+.ss88-vum-copy:focus,
+.ss88-vum-copy.is-copied {
+	opacity:0.6;
+}
+.ss88-vum-copy:hover,
+.ss88-vum-copy:focus {
+	opacity:1!important;
+}
+.ss88-vum-copy.is-copied .dashicons-yes {
+	color:#00a32a;
+}
+.ss88-vum-copy.is-copied .dashicons-no {
+	color:#d63638;
+}
+
+/* Touch devices can't hover, so always show the copy buttons */
+@media (hover: none) {
+
+	.ss88-vum-copy {
+		opacity:0.6;
+	}
+
+}
 
 @media screen and (max-width:768px) {
 
@@ -118,7 +201,7 @@
 		padding-right:20px!important;
 	}
 
-	.btn-delete {
+	.ss88-vum-delete {
 		position: relative;
 		top: -2px;
 		right: -5px;

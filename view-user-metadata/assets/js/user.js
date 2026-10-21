@@ -7,18 +7,15 @@ let SS88_VUM = {
 		SS88_VUM.lockBtns();
 		SS88_VUM.initExport();
         SS88_VUM.initFocus();
+        SS88_VUM.initCopy();
+        SS88_VUM.initRaw();
         
     },
     initToggle: ()=>{
 
-        let OnorOff = localStorage.getItem('SS88-VUM');
+        let OnorOff = null;
 
-        if(OnorOff==null) {
-            
-            OnorOff = true;
-            localStorage.setItem('SS88-VUM', OnorOff);
-
-        }
+        try { OnorOff = localStorage.getItem('SS88-VUM'); } catch(err) {}
 
         OnorOff = (OnorOff==='false') ? false : true;
 
@@ -60,18 +57,22 @@ let SS88_VUM = {
     },
     store: (checked) => {
         
-        if(checked===true || checked===false) localStorage.setItem('SS88-VUM', checked);
+        if(checked===true || checked===false) {
+
+            try { localStorage.setItem('SS88-VUM', checked); } catch(err) {}
+
+        }
 
     },
 	deleteBtns: () => {
 
-		document.querySelectorAll('button.btn-delete[data-key]').forEach((button)=>{
+		document.querySelectorAll('button.ss88-vum-delete[data-key]').forEach((button)=>{
 
 			button.addEventListener('click', (e) => {
 
 				e.preventDefault();
 
-				if( confirm(SS88_VUM_translations.confirm_delete) ) {
+				if( confirm(button.dataset.confirm) ) {
 
 					fetch(ajaxurl, {
 
@@ -88,14 +89,14 @@ let SS88_VUM = {
 						if(response.success) {
 	
 							alert(SS88_VUM_translations.success + ' ' + response.data.body);
-							button.parentElement.parentElement.parentElement.remove();
+							button.closest('tr').remove();
 							document.querySelector('#SS88-VUM-table').classList.remove('ss88-focus');
 	
 						}
 						else {
 
 							const HttpCode = (response && response.data && typeof response.data.httpcode !== 'undefined') ? response.data.httpcode : 'unknown';
-							const Message = (response && response.data && response.data.body) ? response.data.body : 'The server returned an unexpected response.';
+							const Message = (response && response.data && response.data.body) ? response.data.body : SS88_VUM_translations.unexpected_response;
 	
 							alert(SS88_VUM_translations.error + ' ' + HttpCode + ': ' + Message);
 	
@@ -112,13 +113,13 @@ let SS88_VUM = {
 	},
 	lockBtns: () => {
 
-		document.querySelectorAll('button.btn-lock[data-lock]').forEach((button)=>{
+		document.querySelectorAll('button.ss88-vum-lock[data-lock]').forEach((button)=>{
 
 			button.addEventListener('click', (e) => {
 
 				e.preventDefault();
 
-				const deleteBtn = button.parentElement.querySelector('button.btn-delete[data-key]');
+				const deleteBtn = button.parentElement.querySelector('button.ss88-vum-delete[data-key]');
 
 				if(!deleteBtn) return;
 
@@ -161,7 +162,7 @@ let SS88_VUM = {
 		trigger.addEventListener('click', (e) => {
 
 			e.preventDefault();
-			menu.classList.toggle('is-open');
+			SS88_VUM.setExportMenu(!menu.classList.contains('is-open'));
 
 		});
 
@@ -170,7 +171,7 @@ let SS88_VUM = {
 			button.addEventListener('click', (e) => {
 
 				e.preventDefault();
-				menu.classList.remove('is-open');
+				SS88_VUM.setExportMenu(false);
 				SS88_VUM.exportMeta(button.dataset.format, wrapper.dataset.uid);
 
 			});
@@ -179,16 +180,33 @@ let SS88_VUM = {
 
 		document.addEventListener('click', (e) => {
 
-			if(!e.target.closest('#SS88VUM-export-wrap')) menu.classList.remove('is-open');
+			if(!e.target.closest('#SS88VUM-export-wrap')) SS88_VUM.setExportMenu(false);
 
 		});
+
+		document.addEventListener('keydown', (e) => {
+
+			if(e.key === 'Escape' && menu.classList.contains('is-open')) {
+
+				SS88_VUM.setExportMenu(false);
+				trigger.focus();
+
+			}
+
+		});
+
+	},
+	setExportMenu: (open) => {
+
+		document.querySelector('#SS88VUM-export-menu').classList.toggle('is-open', open);
+		document.querySelector('#SS88VUM-export-trigger').setAttribute('aria-expanded', open ? 'true' : 'false');
 
 	},
 	exportMeta: (format, uid) => {
 
 		if(!format || !uid) {
 
-			alert(SS88_VUM_translations.error + ' Missing export parameters.');
+			alert(SS88_VUM_translations.error + ' ' + SS88_VUM_translations.missing_export);
 			return;
 
 		}
@@ -213,7 +231,7 @@ let SS88_VUM = {
 			else {
 
 				const HttpCode = (response && response.data && typeof response.data.httpcode !== 'undefined') ? response.data.httpcode : 'unknown';
-				const Message = (response && response.data && response.data.body) ? response.data.body : 'The export response was invalid.';
+				const Message = (response && response.data && response.data.body) ? response.data.body : SS88_VUM_translations.invalid_export;
 				alert(SS88_VUM_translations.error + ' ' + HttpCode + ': ' + Message);
 
 			}
@@ -231,7 +249,7 @@ let SS88_VUM = {
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
-		URL.revokeObjectURL(link.href);
+		setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 
 	},
     initFocus: () => {
@@ -240,18 +258,143 @@ let SS88_VUM = {
 
             tr.addEventListener('click', (e)=>{
 
-                if(e.target.closest('button.btn-delete, button.btn-lock')) return;
+                if(e.target.closest('button.ss88-vum-delete, button.ss88-vum-lock, button.ss88-vum-copy')) return;
 
-                document.querySelectorAll('#SS88-VUM-table-wrapper tr').forEach(tr => { tr.classList.remove('ss88-focus') });
-                document.querySelector('#SS88-VUM-table').classList.toggle('ss88-focus');
-                tr.classList.add('ss88-focus');
+                const table = document.querySelector('#SS88-VUM-table');
+                const wasFocused = table.classList.contains('ss88-focus') && tr.classList.contains('ss88-focus');
+
+                document.querySelectorAll('#SS88-VUM-table-wrapper tr').forEach(row => { row.classList.remove('ss88-focus') });
+
+                if(wasFocused) table.classList.remove('ss88-focus');
+                else {
+
+                    table.classList.add('ss88-focus');
+                    tr.classList.add('ss88-focus');
+
+                }
 
             })
 
         })
 
-    }
+    },
+	initCopy: () => {
 
+		document.querySelectorAll('#SS88-VUM-table button.ss88-vum-copy').forEach((button)=>{
+
+			button.addEventListener('click', (e) => {
+
+				e.preventDefault();
+
+				let Text = '';
+
+				if(button.classList.contains('ss88-vum-copy-key')) Text = button.dataset.key;
+				else {
+
+					// Copy whichever view is showing. Multiple values are joined with new lines.
+					const Wrapper = document.querySelector('#SS88-VUM-table-wrapper');
+					const Container = button.closest('td').querySelector(Wrapper.classList.contains('is-raw') ? '.ss88-vum-raw' : '.ss88-vum-formatted');
+
+					Text = Array.from(Container.querySelectorAll('.ss88-vum-value')).map((el) => el.hasAttribute('data-empty') ? '' : el.textContent).join('\n');
+
+				}
+
+				SS88_VUM.copyText(Text).then(() => SS88_VUM.copyFeedback(button, true)).catch(() => SS88_VUM.copyFeedback(button, false));
+
+			});
+
+		});
+
+	},
+	copyText: (text) => {
+
+		if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+
+		// The Clipboard API needs HTTPS, so fall back to a hidden textarea on plain HTTP admin screens.
+		return new Promise((resolve, reject) => {
+
+			const Area = document.createElement('textarea');
+			const PreviousFocus = document.activeElement;
+			let Copied = false;
+
+			Area.value = text;
+			Area.setAttribute('readonly', '');
+			Area.style.position = 'fixed';
+			Area.style.top = '0';
+			Area.style.opacity = '0';
+			document.body.appendChild(Area);
+			Area.select();
+			Area.setSelectionRange(0, text.length); // iOS Safari ignores select()
+
+			try { Copied = document.execCommand('copy'); } catch(err) {}
+
+			document.body.removeChild(Area);
+
+			// Selecting the textarea moved focus, so return it to the button for keyboard users.
+			if(PreviousFocus && PreviousFocus.focus) PreviousFocus.focus();
+
+			if(Copied) resolve();
+			else reject();
+
+		});
+
+	},
+	copyFeedback: (button, ok) => {
+
+		const Icon = button.querySelector('.dashicons');
+		const Message = ok ? SS88_VUM_translations.copied : SS88_VUM_translations.copy_failed;
+
+		if(!button.dataset.title) button.dataset.title = button.title;
+
+		clearTimeout(button.SS88Timer);
+		Icon.classList.remove('dashicons-admin-page', 'dashicons-yes', 'dashicons-no');
+		Icon.classList.add(ok ? 'dashicons-yes' : 'dashicons-no');
+		button.classList.add('is-copied');
+		button.title = Message;
+
+		if(window.wp && wp.a11y && wp.a11y.speak) wp.a11y.speak(Message);
+
+		button.SS88Timer = setTimeout(() => {
+
+			Icon.classList.remove('dashicons-yes', 'dashicons-no');
+			Icon.classList.add('dashicons-admin-page');
+			button.classList.remove('is-copied');
+			button.title = button.dataset.title;
+
+		}, 1500);
+
+	},
+	initRaw: () => {
+
+		const Button = document.querySelector('#SS88VUM-raw-toggle');
+
+		if(!Button) return;
+
+		let Raw = false;
+
+		try { Raw = (localStorage.getItem('SS88-VUM-raw') === 'true'); } catch(err) {}
+
+		SS88_VUM.setRaw(Raw);
+
+		Button.addEventListener('click', (e) => {
+
+			e.preventDefault();
+
+			const Next = Button.getAttribute('aria-pressed') !== 'true';
+
+			SS88_VUM.setRaw(Next);
+
+			try { localStorage.setItem('SS88-VUM-raw', Next); } catch(err) {}
+
+		});
+
+	},
+	setRaw: (raw) => {
+
+		document.querySelector('#SS88-VUM-table-wrapper').classList.toggle('is-raw', raw);
+		document.querySelector('#SS88VUM-raw-toggle').setAttribute('aria-pressed', raw ? 'true' : 'false');
+
+	}
 }
 
 window.addEventListener('DOMContentLoaded', (event) => {
